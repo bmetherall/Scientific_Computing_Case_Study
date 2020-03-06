@@ -23,7 +23,7 @@ end
 	
 	val = (x-0.5)^2 + (y-0.5)^2
 	
-	#val = 1.0
+	val = 1.0
 	
 	return val
 end
@@ -143,7 +143,7 @@ println("h = ", h)
 
 @time solve_pde(N = 2, t_max = 0.01, N_time = 2) # Compile
 
-@time pde_solution = solve_pde(N = N, t_max = t_max, N_time = N_time, gamma = 10.0);
+@time pde_solution = solve_pde(N = N, t_max = t_max, N_time = N_time, gamma = 1.0);
 
 # Print output for plotting
 print_step = 100
