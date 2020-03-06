@@ -42,13 +42,15 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 	# define spatial and temporal stepsize
 	h = 1/(N-1)
 	tau = t_max/(N_time - 1)
+
+	M = trunc(Int, 5.25 / h + 1) # Apsect ratio of domain
 	
 	# define list, will be filled with N_times matrices, each matrix corresponding to one spatial slice at constant t
 	potential = []
 	temperature = []
 
-	u_current = zeros((N, N))
-	theta_current = zeros((N, N))
+	u_current = zeros((M, N))
+	theta_current = zeros((M, N))
 	
 	# compute solutions by stepping through time
     for t = 1:N_time
@@ -57,12 +59,12 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
             println(t)
         end
 
-		u_current = zeros((N, N))
-		theta_current = zeros((N, N))
+		u_current = zeros((M, N))
+		theta_current = zeros((M, N))
 
 		# compute initial values at t = 0 via v_0
 		if t == 1
-			for m = 1:N, n = 1:N
+			for m = 1:M, n = 1:N
 				(x,y,tt) = cart_coord(m, n, t; h = h, tau = tau)			  
 				u_current[m,n] = u_0(x,y)
 				theta_current[m,n] = u_0(x,y)
@@ -74,7 +76,7 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			u_old = potential[t-1]
 			theta_old = temperature[t-1]
 			
-            for m = 2:N-1
+            for m = 2:M-1
                 for n = 2:N-1
 					# (x,y,tt) = cart_coord(m, n, t; h = h, tau = tau)
                     # (x_plus,y_plus,tt) = cart_coord(m + 1, n + 1, t; h = h, tau = tau)
@@ -101,29 +103,29 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			for n = 2:N-1
 				(x,y,tt) = cart_coord(0, n, t; h = h, tau = tau)
 				u_current[1,n] = 0.0
-				u_current[N,n] = (4*u_current[N-1,n] - u_current[N-2,n])/(3 + (2*h*beta/alpha(theta_current[end,n])))
+				u_current[M,n] = (4*u_current[M-1,n] - u_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
 				theta_current[1,n] = 0.0
-				theta_current[N,n] = (4*theta_current[N-1,n] - theta_current[N-2,n])/(3 + (2*h*beta/alpha(theta_current[end,n])))
+				theta_current[M,n] = (4*theta_current[M-1,n] - theta_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
 			end
 			
-			for m = 2:N-1
+			for m = 2:M-1
 				(x,y,tt) = cart_coord(m, 0, t; h = h, tau = tau)
-				u_current[m,1] = -(u_current[m,3] - 4*u_current[m,2])/(3 + (2*h*beta/alpha(theta_current[m,1])))
+				u_current[m,1] = -(u_current[m,3] - 4*u_current[m,2])/(3 + (2*h*beta/alpha(theta_old[m,1])))
 				u_current[m,N] = 1.0
-				theta_current[m,1] = -(theta_current[m,3] - 4*theta_current[m,2])/(3 + (2*h*beta/alpha(theta_current[m,1])))
+				theta_current[m,1] = -(theta_current[m,3] - 4*theta_current[m,2])/(3 + (2*h*beta/alpha(theta_old[m,1])))
 				theta_current[m,N] = 0.0
 			end
 			
 			# compute values at the four corners averaging their two neighbours
 			u_current[1,1] = (u_current[1,2] + u_current[2,1])/2
 			u_current[1,N] = (u_current[2,N] + u_current[1,N-1])/2
-			u_current[N,1] = (u_current[N-1,1] + u_current[N,2])/2
-			u_current[N,N] = (u_current[N-1,N] + u_current[N,N-1])/2
+			u_current[M,1] = (u_current[M-1,1] + u_current[M,2])/2
+			u_current[M,N] = (u_current[M-1,N] + u_current[M,N-1])/2
 			
 			theta_current[1,1] = (theta_current[1,2] + theta_current[2,1])/2
 			theta_current[1,N] = (theta_current[2,N] + theta_current[1,N-1])/2
-			theta_current[N,1] = (theta_current[N-1,1] + theta_current[N,2])/2
-			theta_current[N,N] = (theta_current[N-1,N] + theta_current[N,N-1])/2
+			theta_current[M,1] = (theta_current[M-1,1] + theta_current[M,2])/2
+			theta_current[M,N] = (theta_current[M-1,N] + theta_current[M,N-1])/2
 		end
 
 		# Print how it's converging
@@ -146,11 +148,11 @@ end
 
 # We solve the PDE on $[0,1]^2 \times [0,T]$
 
-N = 50 + 1 # we assume M = N and the index for our spatial points goes 1,...,N, so 2,...,N-1 are the inner spatial points
+N = 20 + 1 # we assume M = N and the index for our spatial points goes 1,...,N, so 2,...,N-1 are the inner spatial points
 h = 1.0 / (N-1) # spatial step size
 
 t_max = 1.0
-N_time = 20000 + 1 # the index for our time points goes 1,...,N_time, so 2,...,N_time-1 are the inner time points
+N_time = 10000 + 1 # the index for our time points goes 1,...,N_time, so 2,...,N_time-1 are the inner time points
 tau = t_max / (N_time - 1) # temporal step size
 
 beta = 1 # we assume beta to be positive
@@ -159,12 +161,12 @@ gamma = 1 # we assume gamma to be positive
 println("tau = ", tau)
 println("h = ", h)
 
-@time solve_pde(N = 2, t_max = 0.01, N_time = 2) # Compile
+@time solve_pde(N = 4, t_max = 0.01, N_time = 2) # Compile
 
 @time potential, temperature = solve_pde(N = N, t_max = t_max, N_time = N_time);
 
-writedlm("Potential.dat", potential[end], ' ')
-writedlm("Temperature.dat", temperature[end], ' ')
+writedlm("Potential.dat", transpose(potential[end]), ' ')
+writedlm("Temperature.dat", transpose(temperature[end]), ' ')
 
 # # Print output for plotting
 # print_step = 100
