@@ -44,6 +44,15 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 	tau = t_max/(N_time - 1)
 
 	M = trunc(Int, 5.25 / h + 1) # Apsect ratio of domain
+	M_left = trunc(Int, M / 3.0)
+	M_right = trunc(Int, 2 * M / 3.0)
+	N_mid = trunc(Int, N / 2.0)
+
+	println(M)
+	println(M_left)	
+	println(M_right)
+	println(N)
+	println(N_mid)
 	
 	# define list, will be filled with N_times matrices, each matrix corresponding to one spatial slice at constant t
 	potential = []
@@ -76,6 +85,7 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			u_old = potential[t-1]
 			theta_old = temperature[t-1]
 			
+			# Interior points
             for m = 2:M-1
                 for n = 2:N-1
 					# (x,y,tt) = cart_coord(m, n, t; h = h, tau = tau)
@@ -101,30 +111,62 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			
 			# compute boundary values using boundary condition
 			for n = 2:N-1
-				(x,y,tt) = cart_coord(0, n, t; h = h, tau = tau)
+				# Left Boundary
 				u_current[1,n] = 0.0
-				u_current[M,n] = (4*u_current[M-1,n] - u_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
 				theta_current[1,n] = 0.0
+				# Right Boundary
+				u_current[M,n] = (4*u_current[M-1,n] - u_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
 				theta_current[M,n] = (4*theta_current[M-1,n] - theta_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
 			end
 			
+			# Bottom Boundary
 			for m = 2:M-1
-				(x,y,tt) = cart_coord(m, 0, t; h = h, tau = tau)
 				u_current[m,1] = -(u_current[m,3] - 4*u_current[m,2])/(3 + (2*h*beta/alpha(theta_old[m,1])))
-				u_current[m,N] = 1.0
 				theta_current[m,1] = -(theta_current[m,3] - 4*theta_current[m,2])/(3 + (2*h*beta/alpha(theta_old[m,1])))
+			end
+
+			# Top Left Boundary
+			for m = 2:M_left-1
+				u_current[m,N] = (4*u_current[m,N-1] - u_current[m,N-2])/(3 + (2*h*beta/alpha(theta_old[m,N])))
+				theta_current[m,N] = (4*theta_current[m,N-1] - theta_current[m,N-2])/(3 + (2*h*beta/alpha(theta_old[m,N])))
+			end
+
+			# Top Middle
+			for m = M_left:M_right-1
+				u_current[m,N_mid] = (4*u_current[m,N_mid-1] - u_current[m,N_mid-2])/(3 + (2*h*beta/alpha(theta_old[m,N_mid])))
+				theta_current[m,N_mid] = (4*theta_current[m,N_mid-1] - theta_current[m,N_mid-2])/(3 + (2*h*beta/alpha(theta_old[m,N_mid])))
+			end
+
+			# Top Right Boundary
+			for m = M_right:M-1 
+				u_current[m,N] = 1.0
 				theta_current[m,N] = 0.0
+			end
+
+			# Middle Left Boundary
+			for n = N_mid:N-1
+				u_current[M_left,n] = (4*u_current[M_left-1,n] - u_current[M_left-2,n])/(3 + (2*h*beta/alpha(theta_old[M_left,n])))
+				theta_current[M_left,n] = (4*theta_current[M_left-1,n] - theta_current[M_left-2,n])/(3 + (2*h*beta/alpha(theta_old[M_left,n])))
+			end
+
+			# Middle Right Boundary
+			for n = N_mid:N-1
+				u_current[M_right,n] = -(u_current[M_right+2,n] - 4*u_current[M_right+1,n])/(3 + (2*h*beta/alpha(theta_old[M_right,n])))
+				theta_current[M_right,n] = -(theta_current[M_right+2,n] - 4*theta_current[M_right+1,n])/(3 + (2*h*beta/alpha(theta_old[M_right,n])))
 			end
 			
 			# compute values at the four corners averaging their two neighbours
+			# Bottom Left
 			u_current[1,1] = (u_current[1,2] + u_current[2,1])/2
-			u_current[1,N] = (u_current[2,N] + u_current[1,N-1])/2
-			u_current[M,1] = (u_current[M-1,1] + u_current[M,2])/2
-			u_current[M,N] = (u_current[M-1,N] + u_current[M,N-1])/2
-			
 			theta_current[1,1] = (theta_current[1,2] + theta_current[2,1])/2
+			# Bottom Right
+			u_current[1,N] = (u_current[2,N] + u_current[1,N-1])/2
 			theta_current[1,N] = (theta_current[2,N] + theta_current[1,N-1])/2
+			# Top Left
+			u_current[M,1] = (u_current[M-1,1] + u_current[M,2])/2
 			theta_current[M,1] = (theta_current[M-1,1] + theta_current[M,2])/2
+			# Top Right
+			u_current[M,N] = (u_current[M-1,N] + u_current[M,N-1])/2
 			theta_current[M,N] = (theta_current[M-1,N] + theta_current[M,N-1])/2
 		end
 
@@ -161,7 +203,7 @@ gamma = 1 # we assume gamma to be positive
 println("tau = ", tau)
 println("h = ", h)
 
-@time solve_pde(N = 4, t_max = 0.01, N_time = 2) # Compile
+@time solve_pde(N = 6, t_max = 0.01, N_time = 2) # Compile
 
 @time potential, temperature = solve_pde(N = N, t_max = t_max, N_time = N_time);
 
