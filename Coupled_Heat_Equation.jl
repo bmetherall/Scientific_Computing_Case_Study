@@ -47,12 +47,6 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 	M_left = trunc(Int, M / 3.0)
 	M_right = trunc(Int, 2 * M / 3.0)
 	N_mid = trunc(Int, N / 2.0)
-
-	println(M)
-	println(M_left)	
-	println(M_right)
-	println(N)
-	println(N_mid)
 	
 	# define list, will be filled with N_times matrices, each matrix corresponding to one spatial slice at constant t
 	potential = []
