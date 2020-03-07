@@ -169,6 +169,15 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			println("Potential ", sum(abs.(u_current .- u_old)))
 			println("Temperature ", sum(abs.(theta_current .- theta_old)))
 		end
+
+		for m = 1:M-1
+			for n = 1:N-1
+				if m > M_left && m < M_right && n > N_mid
+					u_current[m,n] = NaN
+					theta_current[m,n] = NaN
+				end
+			end
+		end
 		        
         # store current solution
 		push!(potential, u_current)
@@ -204,10 +213,10 @@ println("h = ", h)
 writedlm("Potential.dat", transpose(potential[end]), ' ')
 writedlm("Temperature.dat", transpose(temperature[end]), ' ')
 
-f = open("Test.dat", "w");
+f = open("Coupled_Solution.dat", "w");
 
-for i in 1:(trunc(Int, 5.25 / h + 1)-1)
-	for j in 1:(N-1)
+for i in 1:trunc(Int, 5.25 / h + 1)
+	for j in 1:N
 		(x, y, t) = cart_coord(i, j, 1; h = h)
 		writedlm(f, [x y potential[end][i,j] temperature[end][i,j]])
 	end
