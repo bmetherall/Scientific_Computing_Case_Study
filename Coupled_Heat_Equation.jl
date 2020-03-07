@@ -210,6 +210,18 @@ println("h = ", h)
 writedlm("Potential.dat", transpose(potential[end]), ' ')
 writedlm("Temperature.dat", transpose(temperature[end]), ' ')
 
+f = open("Test.dat", "w");
+
+for i in 1:(trunc(Int, 5.25 / h + 1)-1)
+	for j in 1:(N-1)
+		(x, y, t) = cart_coord(i, j, 1; h = h)
+		writedlm(f, [x y potential[end][i,j] temperature[end][i,j]])
+	end
+	println(f, "")
+end
+
+close(f)
+
 # # Print output for plotting
 # print_step = 100
 # for t = 1:N_time
