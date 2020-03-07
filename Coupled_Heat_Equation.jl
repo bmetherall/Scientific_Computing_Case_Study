@@ -166,8 +166,16 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 
 		# Print how it's converging
 		if mod(t, 1000) == 0
+			replace!(u_current, NaN => -1)
+			replace!(u_old, NaN => -1)
+			replace!(theta_current, NaN => -1)
+			replace!(theta_old, NaN => -1)
 			println("Potential ", sum(abs.(u_current .- u_old)))
 			println("Temperature ", sum(abs.(theta_current .- theta_old)))
+			replace!(u_current, -1 => NaN)
+			replace!(u_old, -1 => NaN)
+			replace!(theta_current, -1 => NaN)
+			replace!(theta_old, -1 => NaN)
 		end
 
 		for m = 1:M-1
