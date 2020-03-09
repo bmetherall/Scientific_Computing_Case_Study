@@ -1,3 +1,5 @@
+## Animation
+
 # reset
 
 # set terminal pngcairo color size 8.0in,8.0in lw 1
@@ -42,41 +44,74 @@
 # 	count = count + 1
 # }
 
+## 3D Plot
+# reset
 
-reset
+# set terminal epslatex color size 5.0in,3.125in standalone font 12
 
-set terminal epslatex color size 5.0in,3.125in standalone font 12
+# load 'Data/Viridis.p'
 
-load 'Data/Viridis.p'
+# set grid
+# set xyplane 0
+# set view 60, 320
 
-set grid
-set xyplane 0
-set view 60, 320
+# set xl '$x$' offset 0.25, -0.25
+# set yl '$y$' offset -0.25, -0.25
+# set zl '$u$' offset 3, 0
+# set cbl'$T$ $(\times 100)$' offset 0.5, 0
 
-set xl '$x$' offset 0.25, -0.25
-set yl '$y$' offset -0.25, -0.25
-set zl '$u$' offset screen 0.06, 0
-set cbl rotate by 0 '$T$'
+# set tics out
+# set cbtics in
 
-set tics out
-set cbtics in
+# set cbtics 2
+# set xtics offset 0.25, -0.25
+# set ytics offset -0.25, -0.35
+# set ztics offset 0.3, 0
+# set cbtics offset -0.25, 0
 
-set cbtics 0.02
-set xtics offset 0.25, -0.25
-set ytics offset -0.25, -0.35
-set ztics offset 0.3, 0
+# set xr [0:5.25]
 
-set xr [0:5.25]
+# set pm3d
+# set pm3d interpolate 0, 0
 
-set pm3d
-set pm3d interpolate 0, 0
+# set output 'Coupled.tex'
+# 	set multiplot
+# 	set size 1.04, 1.2
+# 	set origin -0.03, -0.1
+# 	sp 'Coupled_Solution_Long.dat' u 1:2:3:(100*$4) w l lc 8 lw 0.1 not
+# 	unset multiplot
+# set out
 
-set output 'Coupled.tex'
-	set multiplot
-	set size 0.97, 1.2
-	set origin -0.03, -0.1
-	sp 'Coupled_Solution_Long.dat' u 1:2:3:4 w l lc 8 lw 0.1 not
-	unset multiplot
-set out
 
-#sp 'Coupled_Solution.dat' u 1:2:3 w image
+## 2D Plot
+# reset
+# set terminal epslatex color size 4.0in,3.5in standalone font 12
+
+# load 'Data/Viridis.p'
+
+# set pm3d
+# set pm3d interpolate 0,0
+# set view map
+# set grid
+
+# set format x '%.1f'
+# set format y '%.1f'
+# set format cb '%.1f'
+
+# set xl '$x$'
+# set yl rotate by 0 '$y$'
+# set cbl '$v$ $(\times 100)$'
+
+# set size ratio -1
+
+# set contour
+# set cntrparam levels incremental 2, 0.2, 4
+# unset cl
+
+# set lmargin screen 0.0
+
+# unset surface
+
+# set output 'Flat.tex'
+# 	sp 'Data/pde_solution10001.dat' matrix u ($1/50):($2/50):(100*$3) w l lc 8 lw 0.25 not
+# set out

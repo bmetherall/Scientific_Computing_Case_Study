@@ -1,3 +1,11 @@
 *.png
 *.dat
 *checkpoint*
+*converted*
+*.eps
+*.aux
+*.fdb*
+*.fls
+*.log
+*.synctex*
+*.tex
