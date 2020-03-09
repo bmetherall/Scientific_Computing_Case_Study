@@ -115,3 +115,25 @@
 # set output 'Flat.tex'
 # 	sp 'Data/pde_solution10001.dat' matrix u ($1/50):($2/50):(100*$3) w l lc 8 lw 0.25 not
 # set out
+
+## Coupled Convergence
+# reset
+# set terminal epslatex color size 5.0in,3.125in standalone font 12
+
+# set grid
+
+# set xtics 20000
+
+# set xl 'Time Steps'
+# set yl 'Relative Difference'
+
+# set format x '$%.0t\cdot10^{%01T}$'
+# set format y '$10^{%01T}$'
+
+# set logscale y
+
+# set output 'Coupled_Convergence.tex'
+# 	p 'Convergence.dat' u 1:2 w l lw 3 t 'Potential', \
+# 	'' u 1:3 w l dt 5 lw 3 t 'Temperature'
+# set out
+
