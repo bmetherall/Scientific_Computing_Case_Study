@@ -44,9 +44,9 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 	tau = t_max/(N_time - 1)
 
 	M = trunc(Int, 5.25 / h + 1) # Apsect ratio of domain
-	M_left = trunc(Int, M / 3.0)
-	M_right = trunc(Int, 2 * M / 3.0)
-	N_mid = trunc(Int, N / 2.0)
+	M_left = trunc(Int, M  * 2.0 / 5.25 + 1)
+	M_right = trunc(Int, M * 4.25 / 5.25 + 1)
+	N_mid = trunc(Int, N * 3.0 / 4 + 1)
 	
 	# define list, will be filled with N_times matrices, each matrix corresponding to one spatial slice at constant t
 	potential = []
@@ -109,26 +109,26 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 				u_current[1,n] = 0.0
 				theta_current[1,n] = 0.0
 				# Right Boundary
-				u_current[M,n] = (4*u_current[M-1,n] - u_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
-				theta_current[M,n] = (4*theta_current[M-1,n] - theta_current[M-2,n])/(3 + (2*h*beta/alpha(theta_old[M,n])))
+				u_current[M,n] = (4*u_current[M-1,n] - u_current[M-2,n])/3
+				theta_current[M,n] = (4*theta_current[M-1,n] - theta_current[M-2,n])/(3 + 2*h)
 			end
 			
 			# Bottom Boundary
 			for m = 2:M-1
-				u_current[m,1] = -(u_current[m,3] - 4*u_current[m,2])/(3 + (2*h*beta/alpha(theta_old[m,1])))
-				theta_current[m,1] = -(theta_current[m,3] - 4*theta_current[m,2])/(3 + (2*h*beta/alpha(theta_old[m,1])))
+				u_current[m,1] = -(u_current[m,3] - 4*u_current[m,2])/3
+				theta_current[m,1] = -(theta_current[m,3] - 4*theta_current[m,2])/(3 + 2*h)
 			end
 
 			# Top Left Boundary
 			for m = 2:M_left-1
-				u_current[m,N] = (4*u_current[m,N-1] - u_current[m,N-2])/(3 + (2*h*beta/alpha(theta_old[m,N])))
-				theta_current[m,N] = (4*theta_current[m,N-1] - theta_current[m,N-2])/(3 + (2*h*beta/alpha(theta_old[m,N])))
+				u_current[m,N] = (4*u_current[m,N-1] - u_current[m,N-2])/3
+				theta_current[m,N] = (4*theta_current[m,N-1] - theta_current[m,N-2])/(3 + 2*h)
 			end
 
 			# Top Middle
 			for m = M_left:M_right-1
-				u_current[m,N_mid] = (4*u_current[m,N_mid-1] - u_current[m,N_mid-2])/(3 + (2*h*beta/alpha(theta_old[m,N_mid])))
-				theta_current[m,N_mid] = (4*theta_current[m,N_mid-1] - theta_current[m,N_mid-2])/(3 + (2*h*beta/alpha(theta_old[m,N_mid])))
+				u_current[m,N_mid] = (4*u_current[m,N_mid-1] - u_current[m,N_mid-2])/3
+				theta_current[m,N_mid] = (4*theta_current[m,N_mid-1] - theta_current[m,N_mid-2])/(3 + 2*h)
 			end
 
 			# Top Right Boundary
@@ -139,14 +139,14 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 
 			# Middle Left Boundary
 			for n = N_mid:N-1
-				u_current[M_left,n] = (4*u_current[M_left-1,n] - u_current[M_left-2,n])/(3 + (2*h*beta/alpha(theta_old[M_left,n])))
-				theta_current[M_left,n] = (4*theta_current[M_left-1,n] - theta_current[M_left-2,n])/(3 + (2*h*beta/alpha(theta_old[M_left,n])))
+				u_current[M_left,n] = (4*u_current[M_left-1,n] - u_current[M_left-2,n])/3
+				theta_current[M_left,n] = (4*theta_current[M_left-1,n] - theta_current[M_left-2,n])/(3 + 2*h)
 			end
 
 			# Middle Right Boundary
 			for n = N_mid:N-1
-				u_current[M_right,n] = -(u_current[M_right+2,n] - 4*u_current[M_right+1,n])/(3 + (2*h*beta/alpha(theta_old[M_right,n])))
-				theta_current[M_right,n] = -(theta_current[M_right+2,n] - 4*theta_current[M_right+1,n])/(3 + (2*h*beta/alpha(theta_old[M_right,n])))
+				u_current[M_right,n] = -(u_current[M_right+2,n] - 4*u_current[M_right+1,n])/3
+				theta_current[M_right,n] = -(theta_current[M_right+2,n] - 4*theta_current[M_right+1,n])/(3 + 2*h)
 			end
 			
 			# compute values at the four corners averaging their two neighbours
@@ -162,6 +162,16 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			# Top Right
 			u_current[M,N] = (u_current[M-1,N] + u_current[M,N-1])/2
 			theta_current[M,N] = (theta_current[M-1,N] + theta_current[M,N-1])/2
+			# Left Inside
+			u_current[M_left,N] = (u_current[M_left-1,N] + u_current[M_left,N-1])/2
+			theta_current[M_left,N] = (theta_current[M_left-1,N] + theta_current[M_left,N-1])/2
+
+
+			u_current[M_left,N_mid] = (4 * (u_current[M_left-1,N_mid] + u_current[M_left,N_mid-1]) - (u_current[M_left-2,N_mid] + u_current[M_left,N_mid-2]))/6
+			
+			(u_current[M_left-1,N] + u_current[M_left,N-1])/2
+			theta_current[M_left,N_mid] = (theta_current[M_left-1,N] + theta_current[M_left,N-1])/2
+
 		end
 
 		# Print how it's converging
