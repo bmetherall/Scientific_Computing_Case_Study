@@ -191,10 +191,10 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			replace!(theta_old, NaN => -1)
 			# Print how it's converging
 			if mod(t, 1000) == 0
-				println("Potential ", sum(abs.(u_current .- u_old)))
-				println("Temperature ", sum(abs.(theta_current .- theta_old)))
+				println("Potential ", sum(abs.(u_current .- u_old)) / sum(abs.(u_old)))
+				println("Temperature ", sum(abs.(theta_current .- theta_old)) / sum(abs.(theta_old)))
 			end
-			writedlm(conv_f, [t sum(abs.(u_current .- u_old)) sum(abs.(theta_current .- theta_old))])
+			writedlm(conv_f, [t sum(abs.(u_current .- u_old)) / sum(abs.(u_old)) sum(abs.(theta_current .- theta_old)) / sum(abs.(theta_old))])
 			replace!(u_current, -1 => NaN)
 			replace!(u_old, -1 => NaN)
 			replace!(theta_current, -1 => NaN)
