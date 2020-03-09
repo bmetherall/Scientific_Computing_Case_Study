@@ -39,6 +39,7 @@ end
 # define main function
 function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, beta::Float64 = 1.0, gamma::Float64 = 1.0, alpha = alpha, u_0 = u_0)
 	
+	conv_f = open("Convergence.dat", "w")
 	# define spatial and temporal stepsize
 	h = 1/(N-1)
 	tau = t_max/(N_time - 1)
@@ -166,43 +167,47 @@ function solve_pde(;N::Int64 = 11, t_max::Float64 = 1.0, N_time::Int64 = 1001, b
 			u_current[M_left,N] = (u_current[M_left-1,N] + u_current[M_left,N-1])/2
 			theta_current[M_left,N] = (theta_current[M_left-1,N] + theta_current[M_left,N-1])/2
 
-
+			# Inner corners
 			u_current[M_left,N_mid] = (4 * (u_current[M_left-1,N_mid] + u_current[M_left,N_mid-1]) - (u_current[M_left-2,N_mid] + u_current[M_left,N_mid-2]))/6
-			
-			(u_current[M_left-1,N] + u_current[M_left,N-1])/2
-			theta_current[M_left,N_mid] = (theta_current[M_left-1,N] + theta_current[M_left,N-1])/2
+			theta_current[M_left,N_mid] = (4 * (theta_current[M_left-1,N_mid] + theta_current[M_left,N_mid-1]) - (theta_current[M_left-2,N_mid] + theta_current[M_left,N_mid-2]))/6
 
+			u_current[M_right,N_mid] = (4 * (u_current[M_right+1,N_mid] + u_current[M_right,N_mid-1]) - (u_current[M_right+2,N_mid] + u_current[M_right,N_mid-2]))/6
+			theta_current[M_right,N_mid] = (4 * (theta_current[M_right+1,N_mid] + theta_current[M_right,N_mid-1]) - (theta_current[M_right+2,N_mid] + theta_current[M_right,N_mid-2]))/6
 		end
 
-		# Print how it's converging
-		if mod(t, 1000) == 0
-			replace!(u_current, NaN => -1)
-			replace!(u_old, NaN => -1)
-			replace!(theta_current, NaN => -1)
-			replace!(theta_old, NaN => -1)
-			println("Potential ", sum(abs.(u_current .- u_old)))
-			println("Temperature ", sum(abs.(theta_current .- theta_old)))
-			replace!(u_current, -1 => NaN)
-			replace!(u_old, -1 => NaN)
-			replace!(theta_current, -1 => NaN)
-			replace!(theta_old, -1 => NaN)
-		end
-
-		for m = 1:M-1
-			for n = 1:N-1
+		for m = 1:M
+			for n = 1:N
 				if m > M_left && m < M_right && n > N_mid
 					u_current[m,n] = NaN
 					theta_current[m,n] = NaN
 				end
 			end
 		end
-		        
+
+		if mod(t, 100) == 0
+			replace!(u_current, NaN => -1)
+			replace!(u_old, NaN => -1)
+			replace!(theta_current, NaN => -1)
+			replace!(theta_old, NaN => -1)
+			# Print how it's converging
+			if mod(t, 1000) == 0
+				println("Potential ", sum(abs.(u_current .- u_old)))
+				println("Temperature ", sum(abs.(theta_current .- theta_old)))
+			end
+			writedlm(conv_f, [t sum(abs.(u_current .- u_old)) sum(abs.(theta_current .- theta_old))])
+			replace!(u_current, -1 => NaN)
+			replace!(u_old, -1 => NaN)
+			replace!(theta_current, -1 => NaN)
+			replace!(theta_old, -1 => NaN)
+		end
+	        
         # store current solution
 		push!(potential, u_current)
 		push!(temperature, theta_current)
             
 	end
 
+	close(conv_f)
 	return potential, temperature
 
 end
@@ -214,8 +219,8 @@ end
 N = 20 + 1 # we assume M = N and the index for our spatial points goes 1,...,N, so 2,...,N-1 are the inner spatial points
 h = 1.0 / (N-1) # spatial step size
 
-t_max = 1.0
-N_time = 10000 + 1 # the index for our time points goes 1,...,N_time, so 2,...,N_time-1 are the inner time points
+t_max = 10.0
+N_time = trunc(Int, 10000 * t_max + 1) # the index for our time points goes 1,...,N_time, so 2,...,N_time-1 are the inner time points
 tau = t_max / (N_time - 1) # temporal step size
 
 beta = 1 # we assume beta to be positive

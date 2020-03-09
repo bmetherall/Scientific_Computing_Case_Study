@@ -47,28 +47,36 @@ reset
 
 set terminal epslatex color size 5.0in,3.125in standalone font 12
 
-load 'Data/BGY.p'
+load 'Data/Viridis.p'
 
 set grid
 set xyplane 0
 set view 60, 320
 
-set xl '$x$'
-set yl '$y$'
-set zl '$u$'
+set xl '$x$' offset 0.25, -0.25
+set yl '$y$' offset -0.25, -0.25
+set zl '$u$' offset screen 0.06, 0
 set cbl rotate by 0 '$T$'
 
-set cbtics 0.04
+set tics out
+set cbtics in
+
+set cbtics 0.02
 set xtics offset 0.25, -0.25
-set ytics offset -0.25, 0.25
+set ytics offset -0.25, -0.35
+set ztics offset 0.3, 0
 
 set xr [0:5.25]
 
 set pm3d
-set pm3d interpolate 4,4
+set pm3d interpolate 0, 0
 
 set output 'Coupled.tex'
-	sp 'Coupled_Solution.dat' u 1:2:3:4 w l lc 8 lw 1 not
+	set multiplot
+	set size 0.97, 1.2
+	set origin -0.03, -0.1
+	sp 'Coupled_Solution_Long.dat' u 1:2:3:4 w l lc 8 lw 0.1 not
+	unset multiplot
 set out
 
 #sp 'Coupled_Solution.dat' u 1:2:3 w image
