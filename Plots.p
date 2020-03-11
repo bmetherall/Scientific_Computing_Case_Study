@@ -144,6 +144,6 @@
 # set output 'Coupled_Convergence.tex'
 # 	p 'Convergence.dat' u ($1/10000):2 w l lw 3 t 'Potential', \
 # 	'' u ($1/10000):3 w l dt 5 lw 3 t 'Temperature', \
-# 	exp(a * x + b) lc 8 dt 2 lw 2.5 t sprintf('$\exp \left( %1.2f \cdot 10^{-4} t %1.2f \right)$', a, b)
+# 	exp(a * x + b) lc 8 dt 2 lw 2.5 t sprintf('$\exp \left( %1.2f t %1.2f \right)$', a, b)
 # set out
 
