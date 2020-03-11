@@ -116,24 +116,34 @@
 # 	sp 'Data/pde_solution10001.dat' matrix u ($1/50):($2/50):(100*$3) w l lc 8 lw 0.25 not
 # set out
 
-## Coupled Convergence
+# ## Coupled Convergence
 # reset
 # set terminal epslatex color size 5.0in,3.125in standalone font 12
 
 # set grid
 
-# set xtics 20000
+# set xtics 2
 
-# set xl 'Time Steps'
+# set xl 'Time Step $(\times 10^{-4})$'
 # set yl 'Relative Difference'
 
-# set format x '$%.0t\cdot10^{%01T}$'
+# #set format x '$%.0t\cdot10^{%01T}$'
 # set format y '$10^{%01T}$'
 
 # set logscale y
 
+# set key width -9
+
+# a = -1
+# b = -5
+
+# f(x) = a * x + b
+
+# fit [3:] f(x) 'Convergence.dat' u ($1/10000):(log(sqrt($2*$3))) via a, b
+
 # set output 'Coupled_Convergence.tex'
-# 	p 'Convergence.dat' u 1:2 w l lw 3 t 'Potential', \
-# 	'' u 1:3 w l dt 5 lw 3 t 'Temperature'
+# 	p 'Convergence.dat' u ($1/10000):2 w l lw 3 t 'Potential', \
+# 	'' u ($1/10000):3 w l dt 5 lw 3 t 'Temperature', \
+# 	exp(a * x + b) lc 8 dt 2 lw 2.5 t sprintf('$\exp \left( %1.2f \cdot 10^{-4} t %1.2f \right)$', a, b)
 # set out
 
